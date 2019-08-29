@@ -2,8 +2,18 @@
 from django import VERSION
 from django.db.models import F
 from django.db.models.query_utils import Q
-from django.db.models.sql.constants import QUERY_TERMS
 from django.db.models.sql.query import Query
+
+try:
+    from django.db.models.sql.constants import QUERY_TERMS
+except ImportError:
+    # Django 2.1
+   QUERY_TERMS = {
+      'exact', 'iexact', 'contains', 'icontains', 'gt', 'gte', 'lt', 'lte', 'in',
+      'startswith', 'istartswith', 'endswith', 'iendswith', 'range', 'year',
+      'month', 'day', 'week_day', 'hour', 'minute', 'second', 'isnull', 'search',
+      'regex', 'iregex',
+   }
 
 from moneyed import Money
 
@@ -35,7 +45,11 @@ def _get_field(model, name):
 
     # The following is borrowed from the innards of Query.add_filter - it strips out __gt, __exact et al.
     num_parts = len(parts)
-    if num_parts > 1 and parts[-1] in qs.query_terms:
+    if getattr(qs, 'query_terms', None) is not None:
+        q_terms = qs.query_terms
+    else:
+        q_terms = QUERY_TERMS
+    if num_parts > 1 and parts[-1] in q_terms:
         # Traverse the lookup query to distinguish related fields from
         # lookup types.
         for counter, field_name in enumerate(parts, 1):

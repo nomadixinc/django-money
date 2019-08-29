@@ -53,7 +53,7 @@ setup(
     ],
     install_requires=[
         'setuptools',
-        'Django >= 1.4',
+        'Django >= 2.1',
         'py-moneyed > 0.4'
     ],
     platforms=['Any'],
