@@ -7,7 +7,7 @@ from django import VERSION
 from django.core import validators
 from django.core.exceptions import ValidationError
 from django.forms import ChoiceField, DecimalField, MultiValueField
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 from moneyed.classes import Money
 
 from ..settings import CURRENCY_CHOICES
@@ -38,7 +38,13 @@ class MoneyField(MultiValueField):
         # get the default currency if one was specified
         default_currency = kwargs.pop('default_currency', None)
 
-        amount_field = DecimalField(max_value, min_value, max_digits, decimal_places, *args, **kwargs)
+        validators = []
+        if min_value:
+            validators.append(MinValueValidator(min_value))
+        if max_value:
+            validators.append(MaxValueValidator(max_value))
+
+        amount_field = DecimalField(max_digits=max_digits, decimal_places=decimal_places, validators=validators, *args, **kwargs)
         currency_field = ChoiceField(choices=choices)
 
         if VERSION < (1, 8) and hasattr(amount_field, '_has_changed') and hasattr(currency_field, '_has_changed'):
