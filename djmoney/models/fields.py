@@ -412,6 +412,9 @@ class MoneyField(models.DecimalField):
         defaults['default_currency'] = self.default_currency
         return super(MoneyField, self).formfield(**defaults)
 
+    def _get_val_from_obj(self, *args, **kwargs):
+        return self.value_from_object(*args, **kwargs)
+
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
         return self.get_prep_value(value)
